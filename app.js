@@ -2,19 +2,19 @@ import express from 'express';
 
 let app = express();
 
+import engines from 'consolidate';
+
+app.engine('html', engines.nunjucks);
+app.set('view engine', 'html');
+app.set('views', __dirname + '/views');
+
 app.get('/', (req, res) => {
-	res.send('Hello there !!!');
+	res.render('hello', {'name': 'Sandeep'});
 });
 
 app.use((req, res) => {
 	res.sendStatus(400);
 });
-
-// Configure our HTTP server to respond with Hello World to all requests.
-// var server = createServer((request, response) => {
-// 	response.writeHead(200, { 'Content-Type': 'text/plain' });
-// 	response.end('Hello World\n');
-// });
 
 // Listen on port 8000, IP defaults to 127.0.0.1
 app.listen(8000);
