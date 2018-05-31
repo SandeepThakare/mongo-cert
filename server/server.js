@@ -1,12 +1,16 @@
 import express from 'express';
 import { MongoClient } from 'mongodb';
+import mongoose from './db/mongoose';
+import Movies from './models/movies';
+import { urlencoded } from 'body-parser';
 let app = express();
 
 import engines from 'consolidate';
 
 app.engine('html', engines.nunjucks);
 app.set('view engine', 'html');
-app.set('views', __dirname + '/views');
+app.set('/../views', __dirname + '/views');
+app.use(urlencoded({ extended: true }));
 
 MongoClient.connect('mongodb://localhost:27017', (err, client) => {
 
@@ -16,14 +20,8 @@ MongoClient.connect('mongodb://localhost:27017', (err, client) => {
 
 	let db = client.db('video');
 
-	app.get('/', (req, res) => {
-		db.collection('movies').find({}).toArray()
-			.then((result) => {
-				res.render('movies', {'movies': result});
-			})
-			.catch((err) => {
-				console.log('Unable to conect with db. Error JSON: ', JSON.stringify(err, undefined, 2));
-			});
+	app.get('/', (req, res, next) => {
+		res.render('addMovie', {});
 	}); 
 
 	app.use((req, res) => {
