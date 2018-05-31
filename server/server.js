@@ -12,26 +12,38 @@ app.set('view engine', 'html');
 app.set('/../views', __dirname + '/views');
 app.use(urlencoded({ extended: true }));
 
-MongoClient.connect('mongodb://localhost:27017', (err, client) => {
+// let db = client.db('video');
 
-	if (err) {
-		console.log('Unable to conect with db. Error JSON: ', JSON.stringify(err, undefined, 2));
-	}
+app.get('/', (req, res, next) => {
+	res.render('addMovie', {});
+});
 
-	let db = client.db('video');
+app.post('/addedMovie', (req, res, next) => {
+	console.log(req.body);
 
-	app.get('/', (req, res, next) => {
-		res.render('addMovie', {});
-	}); 
-
-	app.use((req, res) => {
-		res.sendStatus(400);
+	let movies = new Movies({
+		title: req.body.title,
+		year: req.body.year,
+		imdb: req.body.imdb
 	});
 
-	// Listen on port 8000, IP defaults to 127.0.0.1
-	app.listen(8000);
-
-	// Put a friendly message on the terminal
-	console.log('Server running at http://127.0.0.1:8000/');
+	movies.save().then((result) => {
+		console.log(result);
+		res.send(result);
+	})
+		.catch((err) => {
+			console.log('Unable to add resords. Error JSON: ', JSON.stringify(err, undefined, 2));
+			res.sendStatus(400);
+		});
 
 });
+
+app.use((req, res) => {
+	res.sendStatus(400);
+});
+
+// Listen on port 8000, IP defaults to 127.0.0.1
+app.listen(8000);
+
+// Put a friendly message on the terminal
+console.log('Server running at http://127.0.0.1:8000/');
