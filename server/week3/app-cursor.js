@@ -5,6 +5,7 @@ var MongoClient = require('mongodb').MongoClient,
 
 var options = commandLineOptions();
 
+
 MongoClient.connect('mongodb://localhost:27017', function(err, client) {
 
 	assert.equal(err, null);
@@ -13,10 +14,11 @@ MongoClient.connect('mongodb://localhost:27017', function(err, client) {
 	let db = client.db('crunchbase');
     
 	var query = queryDocument(options);
-	var projection = {'_id': 1, 'name': 1, 'founded_year': 1,
-		'number_of_employees': 1, 'crunchbase_url': 1};
+	var projection = projectionDocument(options);
 
-	var cursor = db.collection('companies').find(query, projection);
+	var cursor = db.collection('companies').find(query);
+	cursor.project(projection);
+    
 	var numMatches = 0;
 
 	cursor.forEach(
@@ -39,35 +41,41 @@ function queryDocument(options) {
 
 	console.log(options);
     
-	var query = {
-		'founded_year': {
-			'$gte': options.firstYear,
-			'$lte': options.lastYear
-		}
-	};
+	var query = {};
 
-	if ('employees' in options) {
-		query.number_of_employees = { '$gte': options.employees };
+	if ('overview' in options) {
+		query.overview = {'$regex': options.overview, '$options': 'i'};
 	}
-        
+    
 	return query;
     
+}
+
+
+function projectionDocument(options) {
+
+	var projection = {
+		'_id': 0,
+		'name': 1,
+		'founded_year': 1,
+		'overview': 1
+	};
+
+	return projection;
 }
 
 
 function commandLineOptions() {
 
 	var cli = commandLineArgs([
-		{ name: 'firstYear', alias: 'f', type: Number },
-		{ name: 'lastYear', alias: 'l', type: Number },
-		{ name: 'employees', alias: 'e', type: Number }
+		{ name: 'overview', alias: 'o', type: String }
 	]);
     
 	var options = cli.parse();
-	if ( !(('firstYear' in options) && ('lastYear' in options))) {
+	if (Object.keys(options).length < 1) {
 		console.log(cli.getUsage({
 			title: 'Usage',
-			description: 'The first two options below are required. The rest are optional.'
+			description: 'You must supply at least one option. See below.'
 		}));
 		process.exit();
 	}
