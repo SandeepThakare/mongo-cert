@@ -37,5 +37,5 @@ MongoClient.connect('mongodb://localhost:27017', (err, client) => {
 			client.close();
 			throw error;
 		});
-    });
+	});
 });

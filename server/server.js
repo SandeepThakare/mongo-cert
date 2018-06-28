@@ -2,7 +2,7 @@ import express from 'express';
 import { MongoClient } from 'mongodb';
 import mongoose from './db/mongoose';
 import Movies from './models/movies';
-import { urlencoded } from 'body-parser';
+import bodyParser, { urlencoded } from 'body-parser';
 let app = express();
 
 import engines from 'consolidate';
@@ -11,14 +11,15 @@ app.engine('html', engines.nunjucks);
 app.set('view engine', 'html');
 app.set('/../views', __dirname + '/views');
 app.use(urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 // let db = client.db('video');
 
-app.get('/', (req, res, next) => {
+app.get('/', (req, res) => {
 	res.render('addMovie', {});
 });
 
-app.post('/addedMovie', (req, res, next) => {
+app.post('/addedMovie', (req, res) => {
 	console.log(req.body);
 
 	let movies = new Movies({
